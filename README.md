@@ -129,6 +129,8 @@ vercel --prod
 
 ## 🎯 Design Wishlist Mapping
 
+![Design Wishlist](design_wishlist.png)
+
 | Wishlist Item | Implementation |
 |---|---|
 | Expedite discovery calls / enable SA | Discovery Accelerator generates SADs in seconds |

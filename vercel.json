@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/api/nvidia/(.*)", "destination": "/api/nvidia/$1" }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}

@@ -1,0 +1,268 @@
+:root {
+  --nv-black: #000000;
+  --nv-darker-grey: #111111;
+  --nv-dark-grey: #1a1a1a;
+  --nv-grey: #333333;
+  --nv-light-grey: #e0e0e0;
+  --nv-green: #76b900;
+  --nv-green-hover: #8de400;
+  --nv-green-dark: #4a7500;
+  --nv-white: #ffffff;
+
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  background-color: var(--nv-black);
+  color: var(--nv-white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Glassmorphism Panels */
+.glass-panel {
+  background: rgba(26, 26, 26, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+/* Buttons */
+.nv-button {
+  background-color: var(--nv-green);
+  color: var(--nv-black);
+  border: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.nv-button:hover {
+  background-color: var(--nv-green-hover);
+  transform: translateY(-1px);
+}
+
+.nv-button.secondary {
+  background-color: transparent;
+  color: var(--nv-green);
+  border: 1px solid var(--nv-green);
+}
+
+.nv-button.secondary:hover {
+  background-color: rgba(118, 185, 0, 0.1);
+}
+
+.nv-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Layout */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 32px;
+  background-color: var(--nv-darker-grey);
+  border-bottom: 1px solid var(--nv-grey);
+  z-index: 10;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.nav-brand .brand-badge {
+  background-color: var(--nv-green);
+  color: var(--nv-black);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.nav-controls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.domain-select {
+  background-color: var(--nv-dark-grey);
+  color: var(--nv-white);
+  border: 1px solid var(--nv-grey);
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+}
+
+.domain-select:focus {
+  border-color: var(--nv-green);
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Module Selector Tabs */
+.module-tabs {
+  display: flex;
+  background-color: var(--nv-darker-grey);
+  padding: 0 32px;
+  border-bottom: 1px solid var(--nv-grey);
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--nv-light-grey);
+  padding: 16px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: var(--nv-white);
+}
+
+.tab-btn.active {
+  color: var(--nv-green);
+  border-bottom-color: var(--nv-green);
+}
+
+/* Animations */
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(118, 185, 0, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(118, 185, 0, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(118, 185, 0, 0);
+  }
+}
+
+.pulse-active {
+  animation: pulseGlow 2s infinite;
+}
+
+@keyframes flashRed {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.6);
+    border-color: #ff3333;
+  }
+
+  50% {
+    box-shadow: 0 0 20px 5px rgba(255, 51, 51, 0.2);
+    border-color: #ff3333;
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 51, 51, 0);
+    border-color: var(--nv-grey);
+  }
+}
+
+.flash-error {
+  animation: flashRed 1s ease-out;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ROI Simulator */
+.roi-scenario-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.roi-solution-card:hover {
+  border-color: var(--nv-green) !important;
+  transform: translateX(2px);
+  box-shadow: 0 0 12px rgba(118, 185, 0, 0.08);
+}
+
+/* Blueprint buttons */
+.blueprint-btn:hover {
+  border-color: var(--nv-green) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Next Steps action cards */
+.next-step-card:hover {
+  border-color: var(--nv-green) !important;
+  background-color: rgba(118, 185, 0, 0.04) !important;
+  transform: translateX(2px);
+}
+
+/* Catalog items */
+.catalog-item-btn:hover {
+  border-color: var(--nv-green) !important;
+  background-color: rgba(118, 185, 0, 0.06) !important;
+}
+
+/* Example prompt chips */
+.example-prompt-chip:hover {
+  border-color: var(--nv-green) !important;
+  color: #ddd !important;
+}

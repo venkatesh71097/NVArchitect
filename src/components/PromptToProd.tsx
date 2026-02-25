@@ -2,9 +2,95 @@ import React, { useState, useRef } from 'react';
 import {
     Play, Loader2, Cpu, ShieldAlert, Database, Server, Zap, Box, ArrowRight, Globe,
     ClipboardCheck, Lock, BadgeDollarSign, Layers, ChevronDown, ChevronRight,
-    Lightbulb, ArrowRightCircle, Sparkles, MessageCircle, Send
+    Lightbulb, ArrowRightCircle, Sparkles, MessageCircle, Send, ExternalLink, BookOpen
 } from 'lucide-react';
 import { generateArchitecture, chatWithSAD, type ArchitectureResponse, type ArchNode, type ArchVariant, type ChatMessage } from '../services/nvidia-nim';
+
+// ─── NVIDIA Blueprint Catalog ───────────────────────────────────────────────
+interface NvidiaBlueprint {
+    title: string;
+    url: string;
+    description: string;
+    tags: string; // comma-separated, shown under title
+    keywords: string[]; // matched against use_case_title + sad overview
+}
+
+const NVIDIA_BLUEPRINTS: NvidiaBlueprint[] = [
+    {
+        title: 'Build an Enterprise RAG Pipeline Blueprint',
+        url: 'https://build.nvidia.com/nvidia/build-an-enterprise-rag-pipeline',
+        description: 'Power fast, accurate semantic search across multimodal enterprise data with NeMo Retriever and Nemotron models — the production RAG reference architecture.',
+        tags: 'RAG · NeMo Retriever · Nemotron · Enterprise · Launchable',
+        keywords: ['rag', 'retrieval', 'vector', 'knowledge base', 'embeddings', 'semantic search', 'chatbot', 'qa', 'question answering', 'knowledge', 'internal docs', 'nemotron', 'nemo retriever'],
+    },
+    {
+        title: 'Build an AI Agent for Enterprise Research',
+        url: 'https://build.nvidia.com/nvidia/aiq',
+        description: 'Build a custom enterprise research assistant powered by state-of-the-art models that process multimodal data, enabling reasoning, planning, and comprehensive report generation.',
+        tags: 'Research Agent · Reasoning · RAG · Nemotron · Launchable',
+        keywords: ['agent', 'agentic', 'research', 'report', 'reasoning', 'planning', 'synthesis', 'multimodal', 'enterprise assistant', 'analyst', 'summarization', 'tool', 'orchestration'],
+    },
+    {
+        title: 'LLM Router',
+        url: 'https://build.nvidia.com/nvidia/llm-router',
+        description: 'Route LLM requests to the best model for the task at hand — reducing cost and latency by intelligently dispatching queries across a fleet of NIM models.',
+        tags: 'LLM Router · Cost Optimization · NIM · Launchable',
+        keywords: ['llm router', 'routing', 'model selection', 'cost', 'latency', 'multi-model', 'llm', 'inference', 'optimization', 'dispatch', 'fleet'],
+    },
+    {
+        title: 'Safety for Agentic AI',
+        url: 'https://build.nvidia.com/nvidia/safety-for-agentic-ai',
+        description: 'Improve safety, security, and privacy of AI systems at build, deploy, and run stages — guardrails, content moderation, and PII filtering for production agentic pipelines.',
+        tags: 'Safety · Guardrails · Security · Privacy · Agentic · Launchable',
+        keywords: ['safety', 'guardrails', 'security', 'privacy', 'pii', 'content moderation', 'agentic', 'responsible ai', 'hallucination', 'bias', 'shield', 'nemo guardrails'],
+    },
+    {
+        title: 'Streaming Data to RAG',
+        url: 'https://build.nvidia.com/nvidia/streaming-data-to-rag',
+        description: 'Sensor-captured radio and streaming data enables real-time awareness, turning live data feeds into actionable, searchable insights via RAG and NIM.',
+        tags: 'Streaming · RAG · RIVA · Real-time · NIM · Launchable',
+        keywords: ['streaming', 'real-time', 'live data', 'rag', 'riva', 'sensor', 'ingestion', 'pipeline', 'kafka', 'event-driven'],
+    },
+    {
+        title: 'Financial Fraud Detection',
+        url: 'https://build.nvidia.com/nvidia/financial-fraud-detection',
+        description: 'Detect and prevent sophisticated fraudulent activities for financial services with high accuracy using GPU-accelerated graph neural networks.',
+        tags: 'FinTech · Fraud · GNN · Financial Services · Launchable',
+        keywords: ['fraud', 'transaction', 'fintech', 'finance', 'banking', 'detection', 'false positive', 'graph neural', 'real-time analytics', 'financial services'],
+    },
+    {
+        title: 'Vulnerability Analysis for Container Security',
+        url: 'https://build.nvidia.com/nvidia/vulnerability-analysis-for-container-security',
+        description: 'Rapidly identify and mitigate container security vulnerabilities with generative AI using Llama-3.1-70B and NV-EmbedQA for semantic CVE analysis.',
+        tags: 'Cybersecurity · CVE · Containers · Llama-3 · Launchable',
+        keywords: ['cybersecurity', 'security', 'vulnerability', 'cve', 'container', 'devops', 'devsecops', 'threat', 'llm security', 'code security', 'docker', 'kubernetes'],
+    },
+];
+
+// Confidence threshold: a score of 2+ means at least 2 keywords matched,
+// which requires genuine topical overlap. Single-keyword matches are discarded
+// to avoid surfacing irrelevant blueprints.
+const BLUEPRINT_CONFIDENCE_THRESHOLD = 2;
+
+function getMatchingBlueprints(result: ArchitectureResponse): NvidiaBlueprint[] {
+    // Build a search string from use case title + overview bullets
+    const searchText = [
+        result.use_case_title,
+        ...(result.sad.overview || []).slice(0, 4),
+    ].join(' ').toLowerCase();
+
+    // Score each blueprint by keyword overlap (exact substring match)
+    const scored = NVIDIA_BLUEPRINTS.map(bp => ({
+        bp,
+        score: bp.keywords.filter(kw => searchText.includes(kw)).length,
+    }));
+
+    return scored
+        .filter(s => s.score >= BLUEPRINT_CONFIDENCE_THRESHOLD)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3)
+        .map(s => s.bp);
+}
 
 const EXAMPLE_PROMPTS = [
     "Build a patient triage agent that reads EMR records and routes patients based on symptom severity",
@@ -366,6 +452,68 @@ const PromptToProd = () => {
                                 )}
                             </div>
                         ))}
+
+                        {/* ═══ Blueprint Recommendations ═══ */}
+                        {(() => {
+                            const blueprints = getMatchingBlueprints(result);
+                            if (blueprints.length === 0) return null;
+                            return (
+                                <div style={{ padding: '16px 24px', borderTop: '2px solid var(--nv-grey)' }}>
+                                    <h4 style={{
+                                        fontSize: '13px', margin: '0 0 4px',
+                                        display: 'flex', alignItems: 'center', gap: '8px',
+                                        color: 'var(--nv-green)',
+                                    }}>
+                                        <BookOpen size={14} /> Similar NVIDIA Blueprints
+                                    </h4>
+                                    <p style={{ fontSize: '10px', color: '#666', margin: '0 0 12px', lineHeight: 1.5 }}>
+                                        <strong style={{ color: '#999' }}>Stop building from scratch.</strong>{' '}
+                                        Someone's already built this. Adopt a Blueprint, extend it, ship faster.
+                                    </p>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        {blueprints.map((bp, i) => (
+                                            <a
+                                                key={i}
+                                                href={bp.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="blueprint-btn"
+                                                style={{
+                                                    display: 'block',
+                                                    padding: '12px 14px',
+                                                    backgroundColor: 'var(--nv-dark-grey)',
+                                                    border: '1px solid var(--nv-grey)',
+                                                    borderLeft: '3px solid var(--nv-green)',
+                                                    borderRadius: '6px',
+                                                    textDecoration: 'none',
+                                                    transition: 'all 0.2s ease',
+                                                }}
+                                            >
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+                                                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--nv-white)' }}>
+                                                        {bp.title}
+                                                    </span>
+                                                    <ExternalLink size={12} color="var(--nv-green)" style={{ flexShrink: 0, marginLeft: '8px', marginTop: '2px' }} />
+                                                </div>
+                                                <div style={{ fontSize: '10px', color: 'var(--nv-green)', marginBottom: '4px', opacity: 0.8 }}>
+                                                    {bp.tags}
+                                                </div>
+                                                <p style={{ margin: 0, fontSize: '11px', color: '#999', lineHeight: 1.5 }}>
+                                                    {bp.description}
+                                                </p>
+                                            </a>
+                                        ))}
+                                    </div>
+                                    <p style={{ marginTop: '8px', fontSize: '10px', color: '#555', fontStyle: 'italic' }}>
+                                        Explore all blueprints at{' '}
+                                        <a href="https://build.nvidia.com/blueprints" target="_blank" rel="noopener noreferrer"
+                                            style={{ color: 'var(--nv-green)', textDecoration: 'none' }}>
+                                            build.nvidia.com/blueprints →
+                                        </a>
+                                    </p>
+                                </div>
+                            );
+                        })()}
 
                         {/* ═══ NVIDIA vs Market ═══ */}
                         {result.sad.nvidia_vs_market && result.sad.nvidia_vs_market.length > 0 && (

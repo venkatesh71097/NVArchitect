@@ -14,6 +14,8 @@ export interface ArchVariant {
   variant_rationale: string;
   nodes: ArchNode[];
   estimated_monthly_cost: number;
+  estimated_capex?: number;       // one-time hardware cost, only for self-hosted/on-prem variants
+  deployment_model?: 'cloud-api' | 'cloud-gpu' | 'on-prem'; // inferred by LLM from architecture
 }
 
 export interface SADDocument {
@@ -23,7 +25,8 @@ export interface SADDocument {
   data_flow: string[];
   security: string[];
   operations: string[];
-  cost_notes: string[];
+  cost_notes: string[];         // OpEx line items
+  capex_notes?: string[];       // One-time hardware/CapEx costs — only for self-hosted/on-prem variants
   nvidia_vs_market?: { nvidia_product: string; market_alternative: string; nvidia_usp: string }[];
 }
 
@@ -64,7 +67,16 @@ RESPOND WITH VALID JSON ONLY (no markdown fences, no explanation). Schema:
           "product": "Product name (NVIDIA or ecosystem)"
         }
       ],
-      "estimated_monthly_cost": 3500
+      "estimated_monthly_cost": 3500,
+      "deployment_model": "cloud-api"
+    },
+    {
+      "variant_name": "e.g., Self-Hosted on DGX",
+      "variant_rationale": "Data stays in VPC; regulated workload (HIPAA/SOX)",
+      "nodes": [],
+      "estimated_monthly_cost": 5200,
+      "estimated_capex": 320000,
+      "deployment_model": "on-prem"
     }
   ],
   "sad": {
@@ -102,9 +114,15 @@ RESPOND WITH VALID JSON ONLY (no markdown fences, no explanation). Schema:
       "Monitoring: Prometheus on NIM latency + token throughput; Grafana alert if P95 > 4s"
     ],
     "cost_notes": [
-      "NIM API (Llama-3.3-70B): ~$2,100/mo at 50K queries/day",
-      "Milvus managed: ~$500/mo for 500GB",
-      "Total Cloud OpEx: ~$2,800/mo vs self-hosted ~$45K/mo (2× H100 + DevOps FTE)"
+      "OpEx — NIM API (Llama-3.3-70B): ~$2,100/mo at 50K queries/day ($0.042/query)",
+      "OpEx — Milvus managed (Zilliz Cloud): ~$500/mo for 500GB, 3-AZ replication",
+      "OpEx — NeMo Guardrails (cloud): ~$200/mo for 50K calls",
+      "Total monthly OpEx: ~$2,800/mo (cloud-hosted variant)"
+    ],
+    "capex_notes": [
+      "CapEx (self-hosted only) — DGX H100 (8× H100 SXM5): ~$320K one-time purchase",
+      "CapEx — NVIDIA AI Enterprise license: $4,500/GPU/yr × 2 GPUs = $9,000/yr (OpEx after hardware)",
+      "5-yr hardware depreciation: $320K ÷ 5 = $64,000/yr (vs $33,600/yr cloud OpEx → break-even at ~2.5 yrs)"
     ],
     "nvidia_vs_market": [
       {
@@ -142,7 +160,11 @@ RULES:
 3. Each variant: 3-8 nodes. First = "input", last = "output".
 4. Include non-NVIDIA ecosystem tools where appropriate (type = "external"): API Gateways, Kafka, Redis, S3, PostgreSQL, LangChain, LangGraph, Kubernetes, Cursor, Cody, etc.
 5. SAD must be CONCISE — short bullet points only. No prose paragraphs. Every bullet should be scannable by a CTO in 3 seconds.
-6. Cost must have per-component math. State assumptions for query volume.
+6. COST RULES — Cost must have per-component math with assumptions stated.
+   - cost_notes: OpEx ONLY (recurring monthly costs). Never mix CapEx into cost_notes. List each component separately with per-unit math.
+   - capex_notes: Hardware/one-time costs ONLY. Populate this field ONLY for self-hosted or on-prem variants (deployment_model = 'cloud-gpu' or 'on-prem'). Include: hardware purchase price, NVIDIA AI Enterprise license, and a break-even analysis vs cloud OpEx. Leave capex_notes empty array [] for cloud-api variants.
+   - deployment_model: Set to 'cloud-api' for NVIDIA Cloud API / managed services, 'cloud-gpu' for NIM on rented GPU instances (CoreWeave, Lambda, Azure ND), 'on-prem' for self-hosted on purchased DGX or owned GPU hardware.
+   - estimated_capex: Only include (as a number in USD) for cloud-gpu or on-prem variants. Omit or set to 0 for cloud-api variants.
 7. Use real NVIDIA products: NIM (Llama-3.1/3.3, Mistral, Nemotron), NeMo Guardrails, NeMo Retriever, NV-Embed, NeMo Customizer, NeMo Evaluator, NeMo Curator, NeMo Data Designer, Morpheus, Milvus, Triton, TensorRT-LLM, DGX Cloud, RAPIDS.
 8. Tailor security to the domain (HIPAA for healthcare, SOX for finance, GDPR for EU, etc). Flag specific compliance requirements by name.
 9. The examples above show the QUALITY expected. Generate content specific to the user's prompt.

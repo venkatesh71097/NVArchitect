@@ -981,20 +981,15 @@ const ROISimulator = () => {
                                                 ? s.alternatives?.find(a => a.key === currentAltKey)?.tradeoff || s.desc
                                                 : s.desc}
                                         </p>
-                                        {/* Grounding note */}
+                                        {/* Grounding note — condensed to one line */}
                                         {!isUsingAlt && s.benchmarkSource && (
-                                            <p style={{ margin: '6px 0 0', fontSize: '10px', color: '#76b900', lineHeight: 1.4, fontStyle: 'italic' }}>
-                                                📊 {s.benchmarkSource}
+                                            <p style={{ margin: '5px 0 0', fontSize: '10px', color: '#76b900', lineHeight: 1.3 }}>
+                                                📊 {s.benchmarkSource.split('—')[0].trim()}
                                             </p>
                                         )}
                                         {isUsingAlt && s.currentStackNote && (
-                                            <p style={{ margin: '6px 0 0', fontSize: '10px', color: '#ffa726', lineHeight: 1.4, fontStyle: 'italic' }}>
+                                            <p style={{ margin: '5px 0 0', fontSize: '10px', color: '#ffa726', lineHeight: 1.3 }}>
                                                 ⚠️ {s.currentStackNote}
-                                            </p>
-                                        )}
-                                        {isUsingAlt && s.alternatives?.find(a => a.key === currentAltKey)?.source && (
-                                            <p style={{ margin: '3px 0 0', fontSize: '10px', color: '#555', lineHeight: 1.3, fontStyle: 'italic' }}>
-                                                Source: {s.alternatives?.find(a => a.key === currentAltKey)?.source}
                                             </p>
                                         )}
                                     </div>
@@ -1102,9 +1097,6 @@ const ROISimulator = () => {
                                 </button>
                             ))}
                         </div>
-                        <p style={{ margin: '8px 0 0', fontSize: '10px', color: '#666', lineHeight: 1.4 }}>
-                            {deployConfig.description}
-                        </p>
                     </div>
 
                     <h3 style={{
@@ -1316,33 +1308,33 @@ const ROISimulator = () => {
 
 
 
-                {/* ── Success Banner ──────────────────────── */}
-                {allMetricsHit && (
-                    <div style={{
-                        padding: '20px', backgroundColor: 'rgba(118, 185, 0, 0.12)',
-                        border: '2px solid var(--nv-green)', borderRadius: '8px',
-                        animation: 'pulseGlow 2s infinite',
-                    }}>
-                        <h3 style={{
-                            color: 'var(--nv-green)', margin: 0,
-                            display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px',
+                    {/* ── Success Banner ──────────────────────── */}
+                    {allMetricsHit && (
+                        <div style={{
+                            padding: '20px', backgroundColor: 'rgba(118, 185, 0, 0.12)',
+                            border: '2px solid var(--nv-green)', borderRadius: '8px',
+                            animation: 'pulseGlow 2s infinite',
                         }}>
-                            <CheckCircle2 size={20} /> All Targets Achieved!
-                        </h3>
-                        <p style={{ marginTop: '8px', fontSize: '13px', color: 'var(--nv-light-grey)', lineHeight: 1.6, margin: '8px 0 0' }}>
-                            <strong style={{ color: 'var(--nv-green)' }}>
-                                <TrendingUp size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
-                                {' '}
-                            </strong>
-                            {scenario.successMessage}
-                        </p>
-                    </div>
-                )}
+                            <h3 style={{
+                                color: 'var(--nv-green)', margin: 0,
+                                display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px',
+                            }}>
+                                <CheckCircle2 size={20} /> All Targets Achieved!
+                            </h3>
+                            <p style={{ marginTop: '8px', fontSize: '13px', color: 'var(--nv-light-grey)', lineHeight: 1.6, margin: '8px 0 0' }}>
+                                <strong style={{ color: 'var(--nv-green)' }}>
+                                    <TrendingUp size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
+                                    {' '}
+                                </strong>
+                                {scenario.successMessage}
+                            </p>
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
 
-            {/* Bottom padding */ }
-    <div style={{ height: '24px', flexShrink: 0 }} />
+            {/* Bottom padding */}
+            <div style={{ height: '24px', flexShrink: 0 }} />
         </div >
     );
 };

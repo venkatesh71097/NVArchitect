@@ -331,8 +331,35 @@ const PromptToProd = () => {
                             padding: '16px 20px', backgroundColor: 'var(--nv-dark-grey)', borderRadius: '8px',
                             border: '1px solid var(--nv-grey)', marginBottom: '16px',
                         }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                                <h4 style={{ margin: 0, fontSize: '13px', color: 'var(--nv-white)' }}>Estimated Cloud OpEx</h4>
+                            {/* Header row: label + deployment badge + monthly cost */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                                <div>
+                                    <h4 style={{ margin: '0 0 4px', fontSize: '13px', color: 'var(--nv-white)' }}>
+                                        {result.variants[selectedVariant]?.deployment_model === 'on-prem'
+                                            ? 'Estimated OpEx (On-Prem)'
+                                            : result.variants[selectedVariant]?.deployment_model === 'cloud-gpu'
+                                                ? 'Estimated OpEx (Self-Hosted Cloud)'
+                                                : 'Estimated Cloud OpEx'}
+                                    </h4>
+                                    {/* Deployment model badge */}
+                                    {result.variants[selectedVariant]?.deployment_model && (
+                                        <span style={{
+                                            fontSize: '9px', fontWeight: 700, padding: '2px 7px', borderRadius: '10px',
+                                            backgroundColor: result.variants[selectedVariant]?.deployment_model === 'on-prem'
+                                                ? 'rgba(255,167,38,0.15)' : result.variants[selectedVariant]?.deployment_model === 'cloud-gpu'
+                                                    ? 'rgba(118,185,0,0.12)' : 'rgba(100,149,237,0.15)',
+                                            color: result.variants[selectedVariant]?.deployment_model === 'on-prem'
+                                                ? '#ffa726' : result.variants[selectedVariant]?.deployment_model === 'cloud-gpu'
+                                                    ? '#76b900' : '#6495ed',
+                                        }}>
+                                            {result.variants[selectedVariant]?.deployment_model === 'on-prem'
+                                                ? '🏢 On-Prem DGX'
+                                                : result.variants[selectedVariant]?.deployment_model === 'cloud-gpu'
+                                                    ? '🖥 Self-Hosted (Cloud GPU)'
+                                                    : '☁ Cloud API'}
+                                        </span>
+                                    )}
+                                </div>
                                 <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--nv-green)' }}>
                                     ${Math.round((result.variants[selectedVariant]?.estimated_monthly_cost || 2500) * costMultiplier).toLocaleString()}/mo
                                 </span>
@@ -346,21 +373,55 @@ const PromptToProd = () => {
                                 displayValue={`${Math.round(costMultiplier * 50)}K/day`}
                             />
 
+                            {/* OpEx line items */}
                             <div style={{ marginTop: '12px', fontSize: '11px', color: '#888' }}>
+                                <div style={{ fontSize: '10px', color: '#555', marginBottom: '4px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    OpEx (recurring monthly)
+                                </div>
                                 {result.sad.cost_notes?.map((note, i) => (
                                     <div key={i} style={{
                                         display: 'flex', justifyContent: 'space-between', padding: '4px 0',
-                                        borderBottom: i < result.sad.cost_notes.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                                        borderBottom: i < (result.sad.cost_notes?.length ?? 0) - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
                                     }}>
                                         <span style={{ color: '#ccc', flex: 1 }}>• {note}</span>
                                     </div>
                                 ))}
                             </div>
 
+                            {/* CapEx section — only shown if the variant is self-hosted/on-prem */}
+                            {(result.sad.capex_notes?.length ?? 0) > 0 && (
+                                <div style={{
+                                    marginTop: '12px', padding: '10px 12px',
+                                    backgroundColor: 'rgba(255,167,38,0.06)',
+                                    border: '1px solid rgba(255,167,38,0.25)',
+                                    borderRadius: '6px',
+                                }}>
+                                    <div style={{ fontSize: '10px', color: '#ffa726', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                        💰 CapEx (one-time hardware)
+                                    </div>
+                                    {result.sad.capex_notes?.map((note, i) => (
+                                        <div key={i} style={{
+                                            fontSize: '11px', color: '#ccc', padding: '3px 0',
+                                            borderBottom: i < (result.sad.capex_notes?.length ?? 0) - 1 ? '1px solid rgba(255,167,38,0.1)' : 'none',
+                                        }}>
+                                            • {note}
+                                        </div>
+                                    ))}
+                                    {result.variants[selectedVariant]?.estimated_capex ? (
+                                        <div style={{ marginTop: '6px', fontSize: '12px', fontWeight: 700, color: '#ffa726' }}>
+                                            Total CapEx: ${(result.variants[selectedVariant].estimated_capex! / 1000).toFixed(0)}K
+                                        </div>
+                                    ) : null}
+                                </div>
+                            )}
+
                             <p style={{ marginTop: '8px', fontSize: '10px', color: '#555', fontStyle: 'italic' }}>
-                                Estimates based on cloud-managed NIM. Self-hosted on DGX differs — your SA can scope exact pricing.
+                                {(result.sad.capex_notes?.length ?? 0) > 0
+                                    ? 'OpEx shown at current volume. CapEx is a one-time hardware purchase — typically breaks even vs cloud in 2–3 years for regulated workloads.'
+                                    : 'Cloud-managed NIM. Switch to a self-hosted variant above to see on-prem CapEx breakdown.'}
                             </p>
                         </div>
+
                     </div>
                 )}
             </div>

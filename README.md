@@ -13,7 +13,20 @@ Ideation courtesy: Venkatesh - the pen & paper design that went behind the plann
 
 ---
 
-## 🎯 The Problem
+## 🎬 Live Demos
+
+### Discovery Accelerator — Enterprise Healthcare RAG Pipeline
+> Prompt → full SAD with architecture diagram, cost breakdown (OpEx + CapEx), NVIDIA vs market comparison, and SA-level questions. ~10 seconds.
+
+<img src="assets/demo_discovery_accelerator.webp" alt="Discovery Accelerator Demo" width="100%"/>
+
+### ROI Simulator — Patient Triage: GPT-4o → NVIDIA NIM
+> Start from the current GPT-4o stack, flip to NVIDIA NIM, watch metrics update in real-time. Switch to On-Prem DGX to see CapEx payback calculation.
+
+<img src="assets/demo_roi_simulator.webp" alt="ROI Simulator Demo" width="100%"/>
+
+---
+
 
 Discovery calls are the highest-leverage moment in enterprise AI sales. But:
 - **SAs might need more time architecting / building prototypes** — a significant portion of customer engagement goes off in trying to converse in a common language, i.e., to get familiarized with each others' workflows. This might leave SAs with lesser time to build Proof of Concepts. 

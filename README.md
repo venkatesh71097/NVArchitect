@@ -5,19 +5,21 @@
 
 # NVArchitect — NVIDIA Virtual Solutions Architect
 
-> **Expedite discovery calls. Enable every sales rep to think like an SA — before the first customer conversation.**
+> **Enable customers / sales-rep to get up to speed with the NVIDIA Ecosystem — before the first discovery call. Intended to expedite the discovery process, which would eventually help SAs focus on spending more time on solving architectural challenges & PoCs.**
 
-NVArchitect is an AI-powered tool that generates production-grade Solution Architecture Documents (SADs), architecture diagrams, competitive comparisons, and ROI simulations — all from a single plain-English prompt. Built for NVIDIA's partner ecosystem. Powered by **NVIDIA NIM (Llama-3.3-70B)**.
+NVArchitect is an AI-powered tool that provides production-grade Solution Architecture Documents (SADs), architecture diagrams, competitive comparisons, and ROI simulations — all from a natural-language use-case. Built for NVIDIA's partner ecosystem. Powered by **NVIDIA NIM (Llama-3.3-70B)**. Built using Claude Opus 4.6 & Gemini 3 Pro. 
+
+Ideation courtesy: Venkatesh - the pen & paper design that went behind the planning and execution of this tool is attached below. PPT on request. 
 
 ---
 
 ## 🎯 The Problem
 
 Discovery calls are the highest-leverage moment in enterprise AI sales. But:
-- **SAs are bottlenecked** — there aren't enough of them for every partner conversation
-- **Sales reps lack technical depth** to have architecture-level discussions early on
-- **Customers need to see value fast** — generic slides don't cut it for AI-savvy buyers
+- **SAs might need more time architecting / building prototypes** — a significant portion of customer engagement goes off in trying to converse in a common language, i.e., to get familiarized with each others' workflows. This might leave SAs with lesser time to build Proof of Concepts. 
+- **Customers need to see value fast** — generic slides don't cut it for AI-savvy buyers. 
 - **Partners need proof points** — quantifiable metrics, not marketing claims
+- **Use GenAI to reduce human bottleneck** - Use Generative AI to build tools to educate customers in an interactive manner to accomplish #1
 
 ## 💡 The Solution
 
@@ -139,7 +141,7 @@ vercel --prod
 | Provide quantifiable approx numbers | Cost breakdown, ROI projections — all grounded in per-component math |
 | FRs, NFRs, RTO, RPO, OpEx/CapEx | SAD includes NFRs, Operations (RTO/RPO), Cost with self-hosted vs cloud |
 | Take up existing use cases | ROI Simulator has 5 industry scenarios with real-world metrics |
-| DIY Blueprint | Architecture Canvas (future: drag-and-drop builder) |
+| DIY Blueprint | Architecture Canvas (drag-and-drop builder: didn't fit too well in the final product as it was too open-ended for a novice exploring NVIDIA products for the first time. Need some design discussion to see how best to design this one) |
 | Show how NVIDIA products give value-add | NVIDIA vs Market section + ROI A/B comparison |
 
 ---

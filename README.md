@@ -141,7 +141,7 @@ vercel --prod
 | Provide quantifiable approx numbers | Cost breakdown, ROI projections — all grounded in per-component math |
 | FRs, NFRs, RTO, RPO, OpEx/CapEx | SAD includes NFRs, Operations (RTO/RPO), Cost with self-hosted vs cloud |
 | Take up existing use cases | ROI Simulator has 5 industry scenarios with real-world metrics |
-| DIY Blueprint | Architecture Canvas (future: drag-and-drop builder) |
+| DIY Blueprint | Architecture Canvas (drag-and-drop builder: didn't fit too well in the final product as it was too open-ended for a novice exploring NVIDIA products for the first time. Need some design discussion to see how best to design this one) |
 | Show how NVIDIA products give value-add | NVIDIA vs Market section + ROI A/B comparison |
 
 ---

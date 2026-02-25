@@ -7,7 +7,9 @@
 
 > **Expedite discovery calls. Enable every sales rep to think like an SA — before the first customer conversation.**
 
-NVArchitect is an AI-powered tool that generates production-grade Solution Architecture Documents (SADs), architecture diagrams, competitive comparisons, and ROI simulations — all from a single plain-English prompt. Built for NVIDIA's partner ecosystem. Powered by **NVIDIA NIM (Llama-3.3-70B)**.
+NVArchitect is an AI-powered tool that generates production-grade Solution Architecture Documents (SADs), architecture diagrams, competitive comparisons, and ROI simulations — all from a single plain-English prompt. Built for NVIDIA's partner ecosystem. Powered by **NVIDIA NIM (Llama-3.3-70B)**. Built using Claude Opus 4.6 & Gemini 3 Pro. 
+
+Ideation courtesy: Venkatesh - the pen & paper design that went behind the planning and execution of this tool is attached below. PPT on request. 
 
 ---
 

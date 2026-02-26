@@ -143,14 +143,17 @@ const PromptToProd = () => {
     const chatEndRef = useRef<HTMLDivElement>(null);
 
     // ── Client-side topic guard ─────────────────────────────────────
-    // Catches obvious non-tech prompts instantly without burning an API call.
+    // Only catches obviously non-tech inputs that are too short or are
+    // pure social greetings. All other intent detection is handled by
+    // the LLM (Rule 16 in the system prompt) which understands context —
+    // e.g., "food industry pipeline" is valid tech, "how to eat pakoda" is not.
     const isOffTopic = (text: string): boolean => {
         const t = text.toLowerCase().trim();
-        // Reject if too short to be a real use case
+        // Too short to describe a real use case
         if (t.length < 15) return true;
-        // Reject greetings and social prompts
+        // Pure social greetings / single-word responses
         const socialPatterns = [
-            /^(hi|hello|hey|howdy|sup|what'?s up)[!?.\s]*$/,
+            /^(hi|hello|hey|howdy|sup|what'?s up)[!?.;\s]*$/,
             /^(how are you|how do you do|good morning|good afternoon|good evening)/,
             /^(thanks|thank you|thx|ty)[!.\s]*$/,
             /^(bye|goodbye|see you|cya)[!.\s]*$/,
@@ -160,19 +163,7 @@ const PromptToProd = () => {
             /^what (are|is) you/,
             /^(tell me a joke|make me laugh|sing a song)/,
         ];
-        if (socialPatterns.some(p => p.test(t))) return true;
-        // Reject obvious non-tech topics — uses word-boundary matching to avoid
-        // false positives (e.g., "Create" must NOT match "eat")
-        const nonTechKeywords = [
-            'recipe', 'cooking', 'food', 'restaurant', 'pakoda', 'pakora', 'pizza', 'burger',
-            'movie', 'film', 'actor', 'actress', 'celebrity', 'singer', 'song', 'music',
-            'cricket', 'football', 'soccer', 'tennis',
-            'weather forecast', 'horoscope', 'zodiac', 'astrology',
-            'politics', 'president', 'prime minister', 'election',
-            'joke', 'meme',
-            'relationship', 'dating', 'marriage', 'divorce',
-        ];
-        return nonTechKeywords.some(kw => new RegExp(`\\b${kw}\\b`).test(t));
+        return socialPatterns.some(p => p.test(t));
     };
 
     const runGeneration = async () => {

@@ -161,18 +161,18 @@ const PromptToProd = () => {
             /^(tell me a joke|make me laugh|sing a song)/,
         ];
         if (socialPatterns.some(p => p.test(t))) return true;
-        // Reject obvious non-tech topics
+        // Reject obvious non-tech topics — uses word-boundary matching to avoid
+        // false positives (e.g., "Create" must NOT match "eat")
         const nonTechKeywords = [
-            'recipe', 'cook', 'food', 'eat', 'drink', 'restaurant', 'pakoda', 'pakora', 'pizza', 'burger',
+            'recipe', 'cooking', 'food', 'restaurant', 'pakoda', 'pakora', 'pizza', 'burger',
             'movie', 'film', 'actor', 'actress', 'celebrity', 'singer', 'song', 'music',
-            'sport', 'cricket', 'football', 'soccer', 'tennis', 'game',
-            'weather', 'temperature', 'rain', 'sunny',
-            'politics', 'president', 'prime minister', 'election', 'vote',
-            'horoscope', 'zodiac', 'astrology',
-            'joke', 'funny', 'humor', 'meme',
-            'relationship', 'dating', 'love', 'marriage', 'divorce',
+            'cricket', 'football', 'soccer', 'tennis',
+            'weather forecast', 'horoscope', 'zodiac', 'astrology',
+            'politics', 'president', 'prime minister', 'election',
+            'joke', 'meme',
+            'relationship', 'dating', 'marriage', 'divorce',
         ];
-        return nonTechKeywords.some(kw => t.includes(kw));
+        return nonTechKeywords.some(kw => new RegExp(`\\b${kw}\\b`).test(t));
     };
 
     const runGeneration = async () => {

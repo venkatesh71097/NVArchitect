@@ -66,12 +66,18 @@ const NVIDIA_BLUEPRINTS: NvidiaBlueprint[] = [
         tags: 'Cybersecurity · CVE · Containers · Llama-3 · Launchable',
         keywords: ['cybersecurity', 'security', 'vulnerability', 'cve', 'container', 'devops', 'devsecops', 'threat', 'llm security', 'code security', 'docker', 'kubernetes'],
     },
+    {
+        title: 'Visual AI Agent',
+        url: 'https://build.nvidia.com/nvidia/ai-agent-for-visual-inspection',
+        description: 'Build an untethered, multimodal vision AI agent that can reason over live video streams and act on visual intelligence for manufacturing and inspection.',
+        tags: 'Vision Agent · VLM · Metropolis · Launchable',
+        keywords: ['vision', 'visual', 'video', 'camera', 'image', 'defect', 'metropolis', 'vlm', 'inspection', 'manufacturing', 'stream', 'multimodal', 'factory'],
+    },
 ];
 
-// Confidence threshold: a score of 2+ means at least 2 keywords matched,
-// which requires genuine topical overlap. Single-keyword matches are discarded
-// to avoid surfacing irrelevant blueprints.
-const BLUEPRINT_CONFIDENCE_THRESHOLD = 2;
+// Confidence threshold: a score of 1+ means at least 1 keyword matched.
+// We keep it at 1 to ensure broader discovery of related blueprints.
+const BLUEPRINT_CONFIDENCE_THRESHOLD = 1;
 
 function getMatchingBlueprints(result: ArchitectureResponse): NvidiaBlueprint[] {
     // Build a search string from use case title + overview bullets

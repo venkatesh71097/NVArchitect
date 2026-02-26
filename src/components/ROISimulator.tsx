@@ -5,6 +5,7 @@ import {
     HeartPulse, Landmark, ShoppingCart, Terminal, Scale, Gauge, Cpu,
     TrendingUp, Calculator, Sparkles
 } from 'lucide-react';
+import { track } from '@vercel/analytics';
 
 // ─── Scenario Data Model ────────────────────────────────────────
 
@@ -784,7 +785,9 @@ const ROISimulator = () => {
     const allMetricsHit = computedMetrics.every(isMetricGood);
 
     const toggleSolution = (key: string) => {
-        setActiveSolutions(prev => ({ ...prev, [key]: !prev[key] }));
+        const newState = !activeSolutions[key];
+        track('roi_solution_toggle', { solution: key, scenario: scenario.id, active: newState });
+        setActiveSolutions(prev => ({ ...prev, [key]: newState }));
     };
 
     const selectAlternative = (solutionKey: string, altKey: string | null) => {
@@ -822,22 +825,22 @@ const ROISimulator = () => {
 
     const formatMetricValue = (m: Metric & { current: number }): string => {
         const val = animatedMetrics[m.key] ?? m.current;
-        if (m.unit === '$') return `$${val.toFixed(2)}`;
-        if (m.unit === '%' || m.unit === '/5') return `${val}${m.unit}`;
-        if (m.unit === 's') return `${val}s`;
-        if (m.unit === 'ms') return `${val}ms`;
+        if (m.unit === '$') return `$${val.toFixed(2)} `;
+        if (m.unit === '%' || m.unit === '/5') return `${val}${m.unit} `;
+        if (m.unit === 's') return `${val} s`;
+        if (m.unit === 'ms') return `${val} ms`;
         if (m.unit === 'min') return `${val} min`;
-        return `${val.toLocaleString()}`;
+        return `${val.toLocaleString()} `;
     };
 
     const formatTargetValue = (m: Metric): string => {
         const dir = m.higherIsBetter ? '>' : '<';
-        if (m.unit === '$') return `${dir} $${m.target}`;
-        if (m.unit === '%' || m.unit === '/5') return `${dir} ${m.target}${m.unit}`;
-        if (m.unit === 's') return `${dir} ${m.target}s`;
-        if (m.unit === 'ms') return `${dir} ${m.target}ms`;
+        if (m.unit === '$') return `${dir} $${m.target} `;
+        if (m.unit === '%' || m.unit === '/5') return `${dir} ${m.target}${m.unit} `;
+        if (m.unit === 's') return `${dir} ${m.target} s`;
+        if (m.unit === 'ms') return `${dir} ${m.target} ms`;
         if (m.unit === 'min') return `${dir} ${m.target} min`;
-        return `${dir} ${m.target.toLocaleString()}`;
+        return `${dir} ${m.target.toLocaleString()} `;
     };
 
     // Compute visible diagram nodes
@@ -874,8 +877,8 @@ const ROISimulator = () => {
                         className="roi-scenario-btn"
                         style={{
                             padding: '10px 16px',
-                            backgroundColor: activeScenarioId === s.id ? `${s.accent}18` : 'var(--nv-dark-grey)',
-                            border: `1px solid ${activeScenarioId === s.id ? s.accent : 'var(--nv-grey)'}`,
+                            backgroundColor: activeScenarioId === s.id ? `${s.accent} 18` : 'var(--nv-dark-grey)',
+                            border: `1px solid ${activeScenarioId === s.id ? s.accent : 'var(--nv-grey)'} `,
                             borderRadius: '8px',
                             cursor: 'pointer',
                             display: 'flex', alignItems: 'center', gap: '10px',
@@ -896,7 +899,7 @@ const ROISimulator = () => {
             {/* ── Scenario Problem Statement ──────────────────── */}
             <div className="glass-panel" style={{
                 margin: '16px 24px 0', padding: '20px 24px',
-                borderLeft: `4px solid ${scenario.accent}`,
+                borderLeft: `4px solid ${scenario.accent} `,
             }}>
                 <h2 style={{
                     fontSize: '20px', marginBottom: '8px',
@@ -948,7 +951,7 @@ const ROISimulator = () => {
                                     style={{
                                         padding: '16px',
                                         backgroundColor: isActive ? (isUsingAlt ? 'rgba(255,167,38,0.08)' : 'rgba(118, 185, 0, 0.08)') : 'var(--nv-dark-grey)',
-                                        border: `1px solid ${isActive ? (isUsingAlt ? '#ffa726' : 'var(--nv-green)') : 'var(--nv-grey)'}`,
+                                        border: `1px solid ${isActive ? (isUsingAlt ? '#ffa726' : 'var(--nv-green)') : 'var(--nv-grey)'} `,
                                         borderRadius: isActive && s.alternatives?.length ? '8px 8px 0 0' : '8px',
                                         cursor: 'pointer',
                                         transition: 'all 0.25s ease',
@@ -1024,7 +1027,7 @@ const ROISimulator = () => {
                                             onClick={(e) => { e.stopPropagation(); selectAlternative(s.key, null); }}
                                             style={{
                                                 padding: '4px 10px', fontSize: '10px', fontWeight: 600,
-                                                border: `1px solid ${!isUsingAlt ? 'var(--nv-green)' : '#555'}`,
+                                                border: `1px solid ${!isUsingAlt ? 'var(--nv-green)' : '#555'} `,
                                                 backgroundColor: !isUsingAlt ? 'rgba(118,185,0,0.15)' : 'transparent',
                                                 color: !isUsingAlt ? 'var(--nv-green)' : '#888',
                                                 borderRadius: '4px', cursor: 'pointer',
@@ -1039,7 +1042,7 @@ const ROISimulator = () => {
                                                 onClick={(e) => { e.stopPropagation(); selectAlternative(s.key, alt.key); }}
                                                 style={{
                                                     padding: '4px 10px', fontSize: '10px', fontWeight: 600,
-                                                    border: `1px solid ${currentAltKey === alt.key ? '#ffa726' : '#555'}`,
+                                                    border: `1px solid ${currentAltKey === alt.key ? '#ffa726' : '#555'} `,
                                                     backgroundColor: currentAltKey === alt.key ? 'rgba(255,167,38,0.15)' : 'transparent',
                                                     color: currentAltKey === alt.key ? '#ffa726' : '#888',
                                                     borderRadius: '4px', cursor: 'pointer',
@@ -1079,8 +1082,8 @@ const ROISimulator = () => {
                                     style={{
                                         flex: 1,
                                         padding: '8px 6px',
-                                        border: `1px solid ${deploymentMode === cfg.mode ? scenario.accent : '#333'}`,
-                                        backgroundColor: deploymentMode === cfg.mode ? `rgba(118,185,0,0.1)` : 'transparent',
+                                        border: `1px solid ${deploymentMode === cfg.mode ? scenario.accent : '#333'} `,
+                                        backgroundColor: deploymentMode === cfg.mode ? `rgba(118, 185, 0, 0.1)` : 'transparent',
                                         borderRadius: '6px',
                                         cursor: 'pointer',
                                         transition: 'all 0.2s ease',
@@ -1114,7 +1117,7 @@ const ROISimulator = () => {
                         return (
                             <div key={m.key} className="glass-panel" style={{
                                 padding: '16px 20px',
-                                borderLeft: `4px solid ${color}`,
+                                borderLeft: `4px solid ${color} `,
                                 transition: 'border-color 0.4s ease',
                             }}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
@@ -1142,7 +1145,7 @@ const ROISimulator = () => {
                                     borderRadius: '3px', overflow: 'hidden',
                                 }}>
                                     <div style={{
-                                        width: `${progress}%`,
+                                        width: `${progress}% `,
                                         height: '100%',
                                         backgroundColor: color,
                                         borderRadius: '3px',
@@ -1172,7 +1175,7 @@ const ROISimulator = () => {
                         return (
                             <div className="glass-panel" style={{
                                 padding: '16px 20px', marginTop: '4px',
-                                borderLeft: `4px solid ${netAnnualSavings > 0 ? 'var(--nv-green)' : '#555'}`,
+                                borderLeft: `4px solid ${netAnnualSavings > 0 ? 'var(--nv-green)' : '#555'} `,
                                 transition: 'border-color 0.4s ease',
                             }}>
                                 <h4 style={{
@@ -1285,8 +1288,8 @@ const ROISimulator = () => {
                                             transition: 'color 0.3s ease', fontVariantNumeric: 'tabular-nums',
                                         }}>
                                             {deployConfig.mode === 'on-prem'
-                                                ? `$${(capexTotal / 1000).toFixed(0)}K`
-                                                : `${netAnnualSavings > 0 ? Math.round((netAnnualSavings / scenario.baseAnnualCost) * 100) : 0}%`}
+                                                ? `$${(capexTotal / 1000).toFixed(0)} K`
+                                                : `${netAnnualSavings > 0 ? Math.round((netAnnualSavings / scenario.baseAnnualCost) * 100) : 0}% `}
                                         </div>
                                     </div>
                                     <div>

@@ -5,6 +5,7 @@ import {
     Lightbulb, ArrowRightCircle, Sparkles, MessageCircle, Send, ExternalLink, BookOpen
 } from 'lucide-react';
 import { generateArchitecture, chatWithSAD, OffTopicError, type ArchitectureResponse, type ArchNode, type ArchVariant, type ChatMessage } from '../services/nvidia-nim';
+import { track } from '@vercel/analytics';
 
 // ─── NVIDIA Blueprint Catalog ───────────────────────────────────────────────
 interface NvidiaBlueprint {
@@ -179,6 +180,7 @@ const PromptToProd = () => {
 
         // Client-side guard: catch non-tech prompts before API call
         if (isOffTopic(promptInput)) {
+            track('off_topic_rejected', { query: promptInput.slice(0, 100) });
             setError('__offtopic__:I can only help with enterprise AI, software, and technology architecture use cases. Please describe a real-world tech problem (e.g., "Build a RAG chatbot for our internal knowledge base").');
             return;
         }
@@ -194,6 +196,11 @@ const PromptToProd = () => {
 
         try {
             const response = await generateArchitecture(promptInput);
+            track('sad_generated', {
+                query: promptInput.slice(0, 200),
+                use_case_title: response.use_case_title,
+                variant_count: response.variants.length,
+            });
             setResult(response);
             animateFlow(response.variants[0]?.nodes.length || 0);
         } catch (err: any) {

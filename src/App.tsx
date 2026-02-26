@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Cpu, GitBranch, ShieldAlert } from 'lucide-react';
+import { Analytics } from '@vercel/analytics/react';
+import { track } from '@vercel/analytics';
 import './index.css';
 
 import PromptToProd from './components/PromptToProd';
@@ -28,7 +30,7 @@ function App() {
       <div className="module-tabs">
         <button
           className={`tab-btn ${activeModule === 'flow' ? 'active' : ''}`}
-          onClick={() => setActiveModule('flow')}
+          onClick={() => { setActiveModule('flow'); track('tab_switch', { module: 'discovery_accelerator' }); }}
           style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
         >
           <GitBranch size={18} />
@@ -36,7 +38,7 @@ function App() {
         </button>
         <button
           className={`tab-btn ${activeModule === 'roi' ? 'active' : ''}`}
-          onClick={() => setActiveModule('roi')}
+          onClick={() => { setActiveModule('roi'); track('tab_switch', { module: 'roi_simulator' }); }}
           style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
         >
           <ShieldAlert size={18} />
@@ -49,6 +51,9 @@ function App() {
         {activeModule === 'flow' && <PromptToProd />}
         {activeModule === 'roi' && <ROISimulator />}
       </main>
+
+      {/* Vercel Analytics — automatic page view tracking */}
+      <Analytics />
     </div>
   );
 }

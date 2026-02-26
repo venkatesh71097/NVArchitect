@@ -182,7 +182,47 @@ RULES:
 15. operations: ALWAYS include one-line reasoning after EVERY metric:
    - RTO: explain what the actual bottleneck is (e.g., "RTO ~15min — LLM is stateless so recovery is fast; bottleneck is vector DB index rehydration")
    - RPO: explain what data is actually at risk (e.g., "RPO ~5min — WAL on vector DB; risk is newly indexed docs, not model weights")
-   - Include LLM-specific ops: drift detection, re-evaluation triggers, fine-tuning cadence`;
+   - Include LLM-specific ops: drift detection, re-evaluation triggers, fine-tuning cadence
+16. OFF-TOPIC GUARD: If the user prompt is NOT a technology use case (e.g., greetings, food, sports, jokes, general chat, or anything unrelated to software/AI/data/cloud/enterprise technology), you MUST respond with this exact JSON and nothing else:
+{"error_type":"off_topic","message":"I can only help with enterprise AI and technology architecture use cases. Please describe a software, AI, data, or cloud use case you'd like to architect with NVIDIA."}
+This rule overrides all other rules. Do not attempt to generate an architecture for non-tech topics.`;
+
+// Custom error class for off-topic / non-tech prompts
+export class OffTopicError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'OffTopicError';
+  }
+}
+
+/**
+ * Robustly extract a JSON object from an LLM response.
+ * Handles: markdown fences (```json ... ```), leading/trailing prose,
+ * and truncated responses by finding the outermost {...} block.
+ */
+function extractJSON(raw: string): string {
+  let text = raw.trim();
+
+  // Strip markdown code fences first
+  text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+
+  // Find the outermost { ... } block via brace counting
+  const start = text.indexOf('{');
+  if (start === -1) throw new SyntaxError('No JSON object found in LLM response');
+
+  let depth = 0;
+  let end = -1;
+  for (let i = start; i < text.length; i++) {
+    if (text[i] === '{') depth++;
+    else if (text[i] === '}') {
+      depth--;
+      if (depth === 0) { end = i; break; }
+    }
+  }
+
+  if (end === -1) throw new SyntaxError('Unterminated JSON object in LLM response');
+  return text.slice(start, end + 1);
+}
 
 export async function generateArchitecture(userPrompt: string): Promise<ArchitectureResponse> {
   const response = await fetch('/api/nvidia/v1/chat/completions', {
@@ -210,13 +250,15 @@ export async function generateArchitecture(userPrompt: string): Promise<Architec
   const data = await response.json();
   const rawContent = data.choices?.[0]?.message?.content || '{}';
 
-  let cleaned = rawContent.trim();
-  if (cleaned.startsWith('```')) {
-    cleaned = cleaned.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+  const jsonStr = extractJSON(rawContent);
+  const parsed = JSON.parse(jsonStr) as ArchitectureResponse & { error_type?: string; message?: string };
+
+  // Check for off-topic guard response from the LLM
+  if (parsed.error_type === 'off_topic') {
+    throw new OffTopicError(parsed.message || 'Please describe an enterprise AI or technology use case.');
   }
 
-  const parsed: ArchitectureResponse = JSON.parse(cleaned);
-  return parsed;
+  return parsed as ArchitectureResponse;
 }
 
 export interface ChatMessage {

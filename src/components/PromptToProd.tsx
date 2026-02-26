@@ -4,7 +4,7 @@ import {
     ClipboardCheck, Lock, BadgeDollarSign, Layers, ChevronDown, ChevronRight,
     Lightbulb, ArrowRightCircle, Sparkles, MessageCircle, Send, ExternalLink, BookOpen
 } from 'lucide-react';
-import { generateArchitecture, chatWithSAD, type ArchitectureResponse, type ArchNode, type ArchVariant, type ChatMessage } from '../services/nvidia-nim';
+import { generateArchitecture, chatWithSAD, OffTopicError, type ArchitectureResponse, type ArchNode, type ArchVariant, type ChatMessage } from '../services/nvidia-nim';
 
 // ─── NVIDIA Blueprint Catalog ───────────────────────────────────────────────
 interface NvidiaBlueprint {
@@ -141,8 +141,48 @@ const PromptToProd = () => {
     const [chatOpen, setChatOpen] = useState(false);
     const chatEndRef = useRef<HTMLDivElement>(null);
 
+    // ── Client-side topic guard ─────────────────────────────────────
+    // Catches obvious non-tech prompts instantly without burning an API call.
+    const isOffTopic = (text: string): boolean => {
+        const t = text.toLowerCase().trim();
+        // Reject if too short to be a real use case
+        if (t.length < 15) return true;
+        // Reject greetings and social prompts
+        const socialPatterns = [
+            /^(hi|hello|hey|howdy|sup|what'?s up)[!?.\s]*$/,
+            /^(how are you|how do you do|good morning|good afternoon|good evening)/,
+            /^(thanks|thank you|thx|ty)[!.\s]*$/,
+            /^(bye|goodbye|see you|cya)[!.\s]*$/,
+            /^(yes|no|ok|okay|sure|fine|great|cool|nice|amazing|wow)[!.\s]*$/,
+            /^(lol|haha|hehe|omg|wtf|bruh)[!.\s]*$/,
+            /^who (are|is) you/,
+            /^what (are|is) you/,
+            /^(tell me a joke|make me laugh|sing a song)/,
+        ];
+        if (socialPatterns.some(p => p.test(t))) return true;
+        // Reject obvious non-tech topics
+        const nonTechKeywords = [
+            'recipe', 'cook', 'food', 'eat', 'drink', 'restaurant', 'pakoda', 'pakora', 'pizza', 'burger',
+            'movie', 'film', 'actor', 'actress', 'celebrity', 'singer', 'song', 'music',
+            'sport', 'cricket', 'football', 'soccer', 'tennis', 'game',
+            'weather', 'temperature', 'rain', 'sunny',
+            'politics', 'president', 'prime minister', 'election', 'vote',
+            'horoscope', 'zodiac', 'astrology',
+            'joke', 'funny', 'humor', 'meme',
+            'relationship', 'dating', 'love', 'marriage', 'divorce',
+        ];
+        return nonTechKeywords.some(kw => t.includes(kw));
+    };
+
     const runGeneration = async () => {
         if (!promptInput.trim()) return;
+
+        // Client-side guard: catch non-tech prompts before API call
+        if (isOffTopic(promptInput)) {
+            setError('__offtopic__:I can only help with enterprise AI, software, and technology architecture use cases. Please describe a real-world tech problem (e.g., "Build a RAG chatbot for our internal knowledge base").');
+            return;
+        }
+
         setIsLoading(true);
         setError(null);
         setResult(null);
@@ -158,7 +198,9 @@ const PromptToProd = () => {
             animateFlow(response.variants[0]?.nodes.length || 0);
         } catch (err: any) {
             console.error(err);
-            if (err.message?.includes('API key') || err.message?.includes('401')) {
+            if (err instanceof OffTopicError) {
+                setError(`__offtopic__:${err.message}`);
+            } else if (err.message?.includes('API key') || err.message?.includes('401')) {
                 setError('Missing or invalid NVIDIA API Key. Set VITE_NVIDIA_API_KEY in .env.');
             } else {
                 setError(`Architecture generation failed: ${err.message}`);
@@ -257,11 +299,22 @@ const PromptToProd = () => {
                     </div>
                 </div>
 
-                {error && (
-                    <div style={{ margin: '0 32px 16px', padding: '12px', backgroundColor: 'rgba(255,51,51,0.1)', border: '1px solid #ff3333', borderRadius: '6px', color: '#ff3333', fontSize: '13px' }}>
-                        {error}
-                    </div>
-                )}
+                {error && (() => {
+                    const isOT = error.startsWith('__offtopic__:');
+                    const msg = isOT ? error.slice('__offtopic__:'.length) : error;
+                    return (
+                        <div style={{
+                            margin: '0 32px 16px', padding: '12px 14px', borderRadius: '6px', fontSize: '13px',
+                            backgroundColor: isOT ? 'rgba(255,167,38,0.08)' : 'rgba(255,51,51,0.1)',
+                            border: `1px solid ${isOT ? 'rgba(255,167,38,0.4)' : '#ff3333'}`,
+                            color: isOT ? '#ffa726' : '#ff3333',
+                            display: 'flex', gap: '10px', alignItems: 'flex-start',
+                        }}>
+                            <span style={{ fontSize: '18px', flexShrink: 0 }}>{isOT ? '🤖' : '⚠️'}</span>
+                            <span>{msg}</span>
+                        </div>
+                    );
+                })()}
 
                 {/* Variant Tabs + Flow */}
                 {result && activeVariant && (
